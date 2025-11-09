@@ -11,7 +11,38 @@
             margin: 0;
             padding: 0;
         }
+<body>
 
+<script>
+(function() {
+    const correctPassword = "inner2025"; // Watermelon_Sun395
+    let attempts = 0;
+    let allowed = false;
+
+    while (!allowed && attempts < 3) {
+        const entered = prompt("Enter password to access InnerCompass:");
+        if (entered === null) {
+            document.body.innerHTML = "<h2>Access Denied</h2><p>You canceled access.</p>";
+            return;
+        }
+        if (entered === correctPassword) {
+            allowed = true;
+        } else {
+            alert("Incorrect password.");
+            attempts++;
+        }
+    }
+
+    if (!allowed) {
+        document.body.innerHTML = "<h2>Access Denied</h2><p>Too many failed attempts.</p>";
+    }
+})();
+</script>
+
+<div id="checkinView" class="container view active">
+    <h1 id="greetingHeader">InnerCompass 🧭</h1>
+    <!-- rest of your app HTML -->
+</div>
         body {
             font-family: 'Roboto', sans-serif;
             min-height: 100vh;
