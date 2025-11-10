@@ -526,3 +526,60 @@
                 weatherButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         weatherButtons.forEach(btn => btn.classList.remove
+// Pro Features
+            function checkProStatus() {
+                // Example placeholder — complete this or remove it if unused
+                const isPro = localStorage.getItem('proUnlocked') === 'true';
+                if (isPro) {
+                    elements.adBanner.style.display = 'none';
+                }
+            }
+
+            // Run initialization
+            displayEntries();
+            checkProStatus();
+
+            // Event Listeners
+            elements.moodButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.moodButtons.forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedMood = btn.dataset.mood;
+                    elements.saveButton.disabled = false;
+                });
+            });
+
+            elements.weatherButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.weatherButtons.forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedWeather = btn.dataset.weather;
+                });
+            });
+
+            elements.saveButton.addEventListener('click', saveEntry);
+            elements.goToJournalBtn.addEventListener('click', () => showView('journal'));
+            elements.goToCheckinBtn.addEventListener('click', () => showView('checkin'));
+            elements.goToProBtn.addEventListener('click', () => elements.proModal.style.display = 'block');
+            elements.closeModal.addEventListener('click', () => elements.proModal.style.display = 'none');
+            elements.unlockBtn.addEventListener('click', () => {
+                if (elements.proCodeInput.value.trim() === UNLOCK_CODE) {
+                    localStorage.setItem('proUnlocked', 'true');
+                    elements.adBanner.style.display = 'none';
+                    alert('Pro access unlocked!');
+                    elements.proModal.style.display = 'none';
+                } else {
+                    alert('Invalid code.');
+                }
+            });
+
+            function showView(view) {
+                elements.checkinView.classList.toggle('active', view === 'checkin');
+                elements.journalView.classList.toggle('active', view === 'journal');
+                if (view === 'journal') displayEntries();
+            }
+
+        })();
+    </script>
+</body>
+</html>
