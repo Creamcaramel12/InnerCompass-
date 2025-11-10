@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>InnerCompass V2.4</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Roboto', sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #6a0dad, #9b30ff);
+        color: #fff;
+        position: relative;
+        padding-bottom: 70px;
+        overflow-x: hidden;
+    }
+
+    /* Floating Radial Gradients */
+    body::before {
+        content: '';
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        animation: float 25s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+    @keyframes float {
+        0%,100% { transform: translate(0,0) rotate(0deg);}
+        33% { transform: translate(30px,-30px) rotate(5deg);}
+        66% { transform: translate(-20px,20px) rotate(-5deg);}
+    }
+
+    .container {
+        width: 90%;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+    h1 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 36px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Bottom Bar */
+    #bottomBar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(0,0,0,0.2);
+        backdrop-filter: blur(12px);
+        display: flex;
+        justify-content: center;
+        padding: 15px 0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+        z-index: 10;
+    }
+    #newEntryBtn {
+        background: linear-gradient(135deg, #9b30ff, #d580ff);
+        border: none;
+        padding: 12px 25px;
+        border-radius: 30px;
+        color: #fff;
+        font-size: 1.1em;
+        cursor: pointer;
+        font-weight: 600;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s;
+    }
+    #newEntryBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+
+    /* Modal common styles */
+    .modal {
+        position: fixed;
+        top:0; left:0; right:0; bottom:0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+    }
+    .modal .modal-content {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(12px);
+        padding: 25px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        color: #333;
+        position: relative;
+        z-index: 25;
+    }
+
+    /* Password Modal */
+    #passwordModal h2 { color: #6a0dad; margin-bottom: 15px; }
+    #passwordModal input {
+        width: 80%;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+    }
+    #passwordModal button {
+        background: linear-gradient(135deg, #6a0dad, #9b30ff);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    #passwordModal button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+
+    /* New Entry Modal */
+    #entryModal h2 { color: #6a0dad; margin-bottom: 10px; }
+    #entryModal textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        resize: vertical;
+        font-family: 'Roboto', sans-serif;
+        margin-bottom: 15px;
+    }
+    #entryModal .moodSelector {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 15px;
+    }
+    .mood-btn {
+        font-size: 2em;
+        background: none;
+        border: none;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all 0.2s;
+        border-radius: 50%;
+    }
+    .mood-btn.selected {
+        opacity: 1;
+        transform: scale(1.2);
+        box-shadow: 0 4px 15px rgba(155,48,255,0.5);
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>InnerCompass 🧭</h1>
+    <p>Welcome! Track your mood and thoughts.</p>
+</div>
+
+<!-- Bottom Bar -->
+<div id="bottomBar">
+    <button id="newEntryBtn">New Entry</button>
+</div>
+
+<!-- Password Modal -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <h2>Enter Password</h2>
+        <input type="password" id="passwordInput" placeholder="Password">
+        <br>
+        <button id="passwordSubmitBtn">Submit</button>
+        <p id="passwordMessage" style="color:red;margin-top:10px;"></p>
+    </div>
+</div>
+
+<!-- New Entry Modal -->
+<div id="entryModal" class="modal">
+    <div class="modal-content">
+        <h2>New Mood Entry</h2>
+        <div class="moodSelector">
+            <button class="mood-btn" data-mood="😃">😃</button>
+            <button class="mood-btn" data-mood="😐">😐</button>
+            <button class="mood-btn" data-mood="😞">😞</button>
+        </div>
+        <textarea placeholder="Write your thoughts..."></textarea>
+        <br>
+        <button id="saveEntryBtn">Save Entry</button>
+    </div>
+</div>
+
+<script>
+const correctPassword = "inner2025";
+let attempts = 0;
+
+const passwordModal = document.getElementById('passwordModal');
+const passwordInput = document.getElementById('passwordInput');
+const passwordSubmitBtn = document.getElementById('passwordSubmitBtn');
+const passwordMessage = document.getElementById('passwordMessage');
+
+passwordModal.style.display = 'flex';
+
+passwordSubmitBtn.addEventListener('click', () => {
+    const entered = passwordInput.value;
+    if(entered === correctPassword) {
+        passwordModal.style.display = 'none';
+    } else {
+        attempts++;
+        passwordMessage.textContent = "Incorrect password.";
+        if(attempts >= 3) {
+            passwordMessage.textContent = "Too many attempts. Access denied.";
+            passwordSubmitBtn.disabled = true;
+            passwordInput.disabled = true;
+        }
+    }
+});
+
+// New Entry Modal
+const newEntryBtn = document.getElementById('newEntryBtn');
+const entryModal = document.getElementById('entryModal');
+const saveEntryBtn = document.getElementById('saveEntryBtn');
+const moodButtons = document.querySelectorAll('.mood-btn');
+let selectedMood = "";
+
+newEntryBtn.addEventListener('click', () => {
+    entryModal.style.display = 'flex';
+});
+
+saveEntryBtn.addEventListener('click', () => {
+    const text = entryModal.querySelector('textarea').value.trim();
+    if(!text) { alert("Please write something."); return; }
+    alert(`Saved Entry:\nMood: ${selectedMood || "Not selected"}\nText: ${text}`);
+    entryModal.querySelector('textarea').value = '';
+    selectedMood = "";
+    moodButtons.forEach(btn => btn.classList.remove('selected'));
+    entryModal.style.display = 'none';
+});
+
+moodButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        moodButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedMood = btn.dataset.mood;
+    });
+});
+
+// Close modal on click outside content
+[entryModal, passwordModal].forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) modal.style.display = 'none';
+    });
+});
+</script>
+
+</body>
+</html>
