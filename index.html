@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>InnerCompass V2.1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* 🎨 NEW STYLES */
+    :root {
+      --primary-purple: #764ba2;
+      --secondary-purple: #f093fb;
+      --light-text: #fff;
+    }
+
+    * { box-sizing: border-box; margin:0; padding:0; }
+    
+    /* Updated background to a distinct purple gradient */
+    body { 
+      font-family: 'Roboto', sans-serif; 
+      min-height:100vh; 
+      background: linear-gradient(135deg, #764ba2, #667eea, #f093fb); 
+      color: var(--light-text); /* Change default text color for better contrast */
+      padding-bottom: 70px; /* Space for the fixed bottom bar */
+    }
+
+    .container { max-width:720px; margin:0 auto; padding:20px 15px; }
+    
+    h1, h2, h3 { color: var(--light-text); font-family: 'Poppins', sans-serif; }
+
+    .nav-btn { 
+      padding:12px 22px; 
+      border-radius:25px; 
+      cursor:pointer; 
+      display:inline-block; 
+      margin:10px 0; 
+      border:none;
+      font-weight: 600;
+      background-color: var(--secondary-purple);
+      color: #333;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background-color 0.3s, transform 0.1s;
+    }
+    .nav-btn:hover {
+        background-color: #e587ef;
+        transform: translateY(-1px);
+    }
+
+    #proUnlockContainer { text-align:center; margin:18px 0 30px; }
+
+    /* New fixed bottom bar style */
+    #bottomBar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--primary-purple);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #bottomBar:hover {
+      background-color: #fff;
+    }
+
+    .pro-content-box {
+        background:rgba(255,255,255,0.95);
+        padding:18px;
+        border-radius:12px;
+        display:inline-block;
+        color: #333;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .pro-content-box h3 {
+        color: var(--primary-purple);
+        margin:6px 0 10px;
+    }
+    .pro-content-box p {
+        margin-bottom: 12px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>InnerCompass 🧭</h1>
+
+    <div id="checkinView" class="view active">
+      <h2 id="greetingHeader">Daily Check-in</h2>
+      <p style="margin-top: 15px;">Welcome to your inner journey. Use the entry bar at the bottom to record a new mood.</p>
+    </div>
+    <div id="proUnlockContainer">
+      <button id="unlockBtn" class="nav-btn" type="button">🔒 Unlock Pro Features</button>
+    </div>
+
+    <div id="proSection" style="display:none; text-align:center; margin-top:12px;"></div>
+
+  </div>
+
+  <div id="bottomBar">
+    ➕ NEW ENTRY
+  </div>
+
+  <script>
+  /*****************************************************************************
+   * Client-side "hidden" PayPal reveal using SHA-256 hash comparison
+   *
+   * NOTE: For real protection, you should always use a server-side function.
+   * This client-side approach prevents casual viewing but not determined attackers.
+   *
+   * To change the password:
+   * 1. Choose a password (e.g., "secretcompass").
+   * 2. Compute its SHA-256 hash (in hex format).
+   * Example (using an online tool or Python):
+   * `python -c "import hashlib;print(hashlib.sha256(b'YourNewPassword').hexdigest())"`
+   * 3. Replace the STORED_HASH value below with the result.
+   *****************************************************************************/
+
+  (function() {
+    // 🛑 IMPORTANT: Replace this hash with the SHA-256 hash of YOUR chosen password.
+    // The current hash is an example.
+    const STORED_HASH = "0dc93ecf3f88cfd44823c5d26f970c7f7ce8bd0a0283558859e6c56782e7aba3";
+
+    const unlockBtn = document.getElementById('unlockBtn');
+    const proSection = document.getElementById('proSection');
+    const bottomBar = document.getElementById('bottomBar');
+
+    // helper: compute SHA-256 hex of a string using Web Crypto API
+    async function sha256Hex(message) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function promptAndReveal() {
+      const entered = prompt("Enter the unlock code to reveal Pro features:");
+      if (entered === null) return; // user cancelled
+
+      try {
+        const h = await sha256Hex(entered);
+        
+        // This is where the password check happens
+        if (h === STORED_HASH) {
+          // success: inject the PayPal link and simple UI
+          proSection.innerHTML = `
+            <div class="pro-content-box">
+              <h3>Support InnerCompass 💛</h3>
+              <p>Thank you for unlocking Pro! Click below to donate and support development.</p>
+              <a href="Paypal.me/moonscape44" target="_blank" class="nav-btn" 
+                 style="background:#0070ba; color:white;">
+                 Donate via PayPal
+              </a>
+              <p style="font-size:0.8em; margin-top:10px;">(This section will remain visible until the page is refreshed.)</p>
+            </div>
+          `;
+          proSection.style.display = 'block';
+          unlockBtn.style.display = 'none'; // hide the unlock button
+          alert("Pro features unlocked successfully!");
+        } else {
+          alert("❌ Incorrect unlock code. Please try again.");
+        }
+      } catch (error) {
+        console.error("Hashing error:", error);
+        alert("An internal error occurred during verification.");
+      }
+    }
+
+    // Attach event listener to the unlock button
+    if (unlockBtn) {
+      unlockBtn.addEventListener('click', promptAndReveal);
+    }
+
+    // Attach event listener to the new entry bar
+    if (bottomBar) {
+      bottomBar.addEventListener('click', () => {
+        alert("New Entry Clicked! This is where you would launch a mood/journal entry form.");
+        // **TODO:** In a real app, replace the alert with code to display your new entry form.
+      });
+    }
+
+  })();
+  </script>
+</body>
+</html>
