@@ -13,30 +13,48 @@
         }
 <body>
 
+<!-- place this where you want the unlock button or near the pro section -->
+<div id="proUnlockContainer"></div>
+
 <script>
 (function() {
-    const correctPassword = "inner2025"; // Watermelon_Sun395
-    let attempts = 0;
-    let allowed = false;
+  const container = document.getElementById('proUnlockContainer');
 
-    while (!allowed && attempts < 3) {
-        const entered = prompt("Enter password to access InnerCompass:");
-        if (entered === null) {
-            document.body.innerHTML = "<h2>Access Denied</h2><p>You canceled access.</p>";
-            return;
-        }
-        if (entered === correctPassword) {
-            allowed = true;
-        } else {
-            alert("Incorrect password.");
-            attempts++;
-        }
-    }
+  // Create the unlock button
+  const proButton = document.createElement('button');
+  proButton.textContent = "Unlock Pro Features 🔒";
+  proButton.style = "display:block;margin:1rem auto;padding:0.6rem 1rem;font-size:1rem;border-radius:8px;cursor:pointer;";
 
-    if (!allowed) {
-        document.body.innerHTML = "<h2>Access Denied</h2><p>Too many failed attempts.</p>";
+  proButton.onclick = async function() {
+    const entered = prompt("Enter the unlock code:");
+    if (!entered) return;
+
+    try {
+      const res = await fetch('/.netlify/functions/checkUnlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: entered })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        // reveal the pro section
+        const pro = document.getElementById('proSection');
+        if (pro) pro.style.display = 'block';
+        proButton.style.display = 'none';
+        alert('Pro features unlocked!');
+      } else {
+        alert('Incorrect code.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error verifying code. Try again later.');
     }
+  };
+
+  container.appendChild(proButton);
 })();
+</script>
 </script>
 
 <div id="checkinView" class="container view active">
