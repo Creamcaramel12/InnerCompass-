@@ -604,4 +604,168 @@
 
             // Pro Features
             function checkProStatus() {
-        
+        function checkProStatus() {
+                const isPro = localStorage.getItem('isProUser') === 'true';
+
+                if (isPro) {
+                    elements.adBanner.style.display = 'none';
+                    elements.goToProBtn.style.display = 'none';
+                    document.body.style.paddingBottom = '0';
+                    displayPrompts(true);
+                } else {
+                    elements.adBanner.style.display = 'block';
+                    elements.goToProBtn.style.display = 'block';
+                    document.body.style.paddingBottom = '60px';
+                    displayPrompts(false);
+                }
+            }
+
+            function unlockPro() {
+                const inputCode = elements.proCodeInput.value.toUpperCase().trim();
+
+                if (inputCode === UNLOCK_CODE) {
+                    localStorage.setItem('isProUser', 'true');
+                    elements.proModal.style.display = 'none';
+                    alert('Success! InnerCompass Pro features unlocked!');
+                    checkProStatus();
+                } else {
+                    alert('Invalid unlock code. Please check your code and try again.');
+                }
+            }
+
+            function displayPrompts(isProUser) {
+                const prompts = [
+                    "What is one thing you can do today that brings you closer to your goal?",
+                    "Describe a challenge you overcame this week and how you did it.",
+                    "If you could talk to your past self, what advice would you give regarding your mood?",
+                    "Identify two small things you are grateful for right now."
+                ];
+
+                if (isProUser) {
+                    const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+                    elements.journalPromptSection.innerHTML = `
+                        <p class="prompt-title">🌟 Daily Reflection Prompt:</p>
+                        <p style="font-size: 1.1em; color: #333; font-style: italic;">"${randomPrompt}"</p>
+                    `;
+                } else {
+                    elements.journalPromptSection.innerHTML = `
+                        <span class="prompt-locked" id="promptLocked">
+                            🔒 Unlock 4+ Daily Prompts with InnerCompass Pro!
+                        </span>
+                    `;
+                    const promptLocked = document.getElementById('promptLocked');
+                    if (promptLocked) {
+                        promptLocked.addEventListener('click', () => {
+                            elements.proModal.style.display = 'block';
+                        });
+                    }
+                }
+            }
+
+            function showView(viewName) {
+                elements.checkinView.classList.remove('active');
+                elements.journalView.classList.remove('active');
+
+                if (viewName === 'checkin') {
+                    elements.checkinView.classList.add('active');
+                } else if (viewName === 'journal') {
+                    elements.journalView.classList.add('active');
+                    displayEntries();
+                }
+            }
+
+            function updateGreeting() {
+                const hour = new Date().getHours();
+                let greeting = "Hello";
+
+                if (hour >= 5 && hour < 12) {
+                    greeting = "Good Morning";
+                } else if (hour >= 12 && hour < 18) {
+                    greeting = "Good Afternoon";
+                } else {
+                    greeting = "Good Evening";
+                }
+                elements.greetingHeader.textContent = `${greeting}, InnerCompass 🧭`;
+            }
+
+            function checkReadyToSave() {
+                if (selectedMood && selectedWeather) {
+                    elements.saveButton.disabled = false;
+                } else {
+                    elements.saveButton.disabled = true;
+                }
+            }
+
+            function initEventListeners() {
+                elements.moodButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        elements.moodButtons.forEach(btn => btn.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedMood = this.getAttribute('data-mood');
+                        checkReadyToSave();
+                    });
+                });
+
+                elements.weatherButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        elements.weatherButtons.forEach(btn => btn.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedWeather = this.getAttribute('data-weather');
+                        checkReadyToSave();
+                    });
+                });
+
+                elements.saveButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    saveEntry();
+                });
+
+                elements.goToJournalBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showView('journal');
+                });
+
+                elements.goToCheckinBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showView('checkin');
+                });
+
+                elements.goToProBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    elements.proModal.style.display = 'block';
+                });
+
+                elements.closeModal.addEventListener('click', function() {
+                    elements.proModal.style.display = 'none';
+                });
+
+                window.addEventListener('click', function(event) {
+                    if (event.target === elements.proModal) {
+                        elements.proModal.style.display = 'none';
+                    }
+                });
+
+                elements.unlockBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    unlockPro();
+                });
+            }
+
+            function init() {
+                updateGreeting();
+                checkProStatus();
+                initEventListeners();
+                showView('checkin');
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+</html>
